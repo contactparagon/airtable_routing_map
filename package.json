@@ -2,6 +2,7 @@
     "dependencies": {
         "@airtable/blocks": "1.0.0",
         "axios": "^0.20.0",
+        "google-map-react": "^2.1.4",
         "react": "^16.13.0",
         "react-dom": "^16.13.0"
     },

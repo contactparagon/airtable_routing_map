@@ -1,82 +1,74 @@
 import { initializeBlock, useBase, useRecords } from "@airtable/blocks/ui";
-import React, { useEffect, useState } from "react";
-import Geocode from "./GeoCoding/Geocode";
-import Optimisation from "./Optimisation/Optimisation";
-//PUT EVERYTHING IN A .THEN
+import GoogleMapReact from "google-map-react";
+import React, { useCallback, useEffect, useState } from "react";
 function RoutedMap() {
-  // YOUR CODE GOES HERE
   const base = useBase();
   const deliveries = base.getTableByName("Food Deliveries");
   const view = deliveries.getViewByName("Monday Route 1");
   const queryResult = view.selectRecords();
   const records = useRecords(queryResult);
-  let optimised;
-  let latlon = [];
-  let unoptimised = {
-    jobs: [],
-    vehicles: [
-      {
-        id: 1,
-        profile: "driving-car",
-        start: [-122.0208176, 37.9775036],
-        end: [-122.0208176, 37.9775036],
-      },
-    ],
+  const [map, setMap] = useState();
+  const [maps, setMaps] = useState();
+  const [points, setPoints] = useState([]);
+
+  const views = deliveries.views.map((view) => view.name);
+  console.log(views);
+  const pointsSetter = () => {
+    let data = records.map((record) => {
+      return record.getCellValue("Address");
+    });
+    setPoints(data);
   };
 
+  const apiIsLoaded = async (map, maps) => {
+    setMap(map);
+    setMaps(maps);
+    pointsSetter();
+  };
+
+  const dataIsLoaded = useCallback(() => {
+    if (map && maps) {
+      const service = new maps.DirectionsService();
+      const renderer = new maps.DirectionsRenderer();
+      service.route(
+        {
+          origin: points[0],
+          waypoints: [
+            { location: points[1] },
+            { location: points[2] },
+            { location: points[3] },
+          ],
+          destination: points[4],
+          travelMode: "DRIVING",
+          optimizeWaypoints: true,
+        },
+        (response, status) => {
+          if (status === "OK") {
+            renderer.setDirections(response);
+            renderer.setMap(map);
+          } else {
+            console.log("Status:", status);
+          }
+        }
+      );
+    } else {
+      console.log("Points not loaded yet");
+    }
+  }, [map, maps, points]);
+
   useEffect(() => {
-    Geocode(records)
-      .then((res) => {
-        console.log("GET GEOCODES RES", res);
-        latlon = res;
-      })
-      .then(() => {
-        let idNo = 0;
-        latlon.map((dropoff) => {
-          let job = { id: (idNo += 1), location: [dropoff.lon, dropoff.lat] };
-          unoptimised.jobs.push(job);
-        });
-        console.log("Unoptimized", unoptimised);
-      })
-      .then(() => {
-        Optimisation(unoptimised)
-          .then((res) => {
-            optimised = res;
-            console.log(optimised);
-          })
-          .catch((err) => console.log("error:", err));
-      });
-  });
-
-  // useEffect(() => {
-  //   console.log("Latlon", latlon);
-  //   let idNo = 0;
-  //   latlon.map((dropoff) => {
-  //     let job = { id: (idNo += 1), location: [dropoff.lon, dropoff.lat] };
-  //     unoptimised.jobs.push(job);
-  //   });
-  //   console.log(unoptimised);
-  // }, [latlon, unoptimised.jobs, unoptimised]);
-
-  // useEffect(() => {
-  //   Optimisation(unoptimised)
-  //     .then((res) => (optimised = res))
-  //     .catch((err) => console.log("error:", err));
-  // }, [unoptimised]);
-
-  // useEffect(() => {
-  //   console.log("optimised", optimised);
-  // }, [optimised]);
+    dataIsLoaded();
+  }, [points, dataIsLoaded]);
 
   return (
-    <div>
-      {records.map((record) => {
-        return (
-          <p key={record.id}>
-            {record.name}: {record.getCellValue("Address")}
-          </p>
-        );
-      })}
+    <div className="googlemap" style={{ height: "100vh" }}>
+      <GoogleMapReact
+        bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
+        defaultCenter={{ lat: 38, lng: 267 }}
+        defaultZoom={5}
+        yesIWantToUseGoogleMapApiInternals
+        onGoogleApiLoaded={({ map, maps }) => apiIsLoaded(map, maps)}
+      ></GoogleMapReact>
     </div>
   );
 }
