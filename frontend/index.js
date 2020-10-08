@@ -1,44 +1,71 @@
 import { initializeBlock, useBase, useRecords } from "@airtable/blocks/ui";
 import GoogleMapReact from "google-map-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { googlemap } from "./Styles/Styles";
+import Dropdown from "./Dropdown/Dropdown";
+
 function RoutedMap() {
   const base = useBase();
-  const deliveries = base.getTableByName("Food Deliveries");
-  const view = deliveries.getViewByName("Monday Route 1");
-  const queryResult = view.selectRecords();
-  const records = useRecords(queryResult);
+  const deliveries = base.getTableByName("Deliveries");
+  const views = deliveries.views;
   const [map, setMap] = useState();
   const [maps, setMaps] = useState();
+  const [service, setService] = useState();
+  const [renderer, setRenderer] = useState();
+  const [defaultMaps, setDefaultMaps] = useState();
   const [points, setPoints] = useState([]);
+  const [view, setView] = useState(
+    deliveries.getViewByName("Route Sorting - Today")
+  );
+  let records = useRecords(view.selectRecords());
+  console.log(view);
+  const [show, setShow] = useState(false);
 
-  const views = deliveries.views.map((view) => view.name);
-  console.log(views);
+  const handleClick = () => {
+    setShow(!show);
+  };
+
   const pointsSetter = () => {
+    console.log("PS View,", view.name);
     let data = records.map((record) => {
       return record.getCellValue("Address");
     });
+    console.log("pointSetter,", data);
     setPoints(data);
   };
 
-  const apiIsLoaded = async (map, maps) => {
+  const viewSetter = (sentView) => {
+    setView(deliveries.getViewByName(sentView.name));
+    setMaps(defaultMaps);
+    console.log("vs, name", view.name);
+    pointsSetter();
+    dataIsLoaded();
+    setShow(false);
+  };
+
+  const apiIsLoaded = (map, maps) => {
     setMap(map);
     setMaps(maps);
+    setRenderer(new maps.DirectionsRenderer());
+    setService(new maps.DirectionsService());
+    setDefaultMaps(maps);
     pointsSetter();
   };
 
+  useEffect(() => {
+    dataIsLoaded();
+  }, [points, dataIsLoaded]);
+
   const dataIsLoaded = useCallback(() => {
-    if (map && maps) {
-      const service = new maps.DirectionsService();
-      const renderer = new maps.DirectionsRenderer();
+    if (map && maps && points) {
+      const waypoints = points.map((point) => {
+        return { location: point };
+      });
       service.route(
         {
-          origin: points[0],
-          waypoints: [
-            { location: points[1] },
-            { location: points[2] },
-            { location: points[3] },
-          ],
-          destination: points[4],
+          origin: waypoints[0]["location"],
+          waypoints: waypoints.slice(1, -1),
+          destination: waypoints.slice(-1)[0]["location"],
           travelMode: "DRIVING",
           optimizeWaypoints: true,
         },
@@ -54,14 +81,23 @@ function RoutedMap() {
     } else {
       console.log("Points not loaded yet");
     }
-  }, [map, maps, points]);
-
-  useEffect(() => {
-    dataIsLoaded();
-  }, [points, dataIsLoaded]);
+  }, [map, maps, points, renderer, service]);
 
   return (
-    <div className="googlemap" style={{ height: "100vh" }}>
+    <div className="googlemap" style={googlemap}>
+      <Dropdown handleClick={handleClick} show={show}>
+        {views.map((view) => {
+          return (
+            <li
+              onClick={() => viewSetter(view)}
+              style={{ padding: "8px 12px", cursor: "pointer" }}
+              key={view.name}
+            >
+              {view.name}
+            </li>
+          );
+        })}
+      </Dropdown>
       <GoogleMapReact
         bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
         defaultCenter={{ lat: 38, lng: 267 }}
