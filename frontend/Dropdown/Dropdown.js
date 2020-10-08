@@ -1,15 +1,26 @@
 import React from "react";
 import { dropdown, dropDownContainer } from "../Styles/Styles";
-const Dropdown = ({ children, handleClick, show }) => {
+const Dropdown = ({ viewSetter, handleClick, show }) => {
   return (
     <div className="container" style={dropDownContainer}>
       <button onClick={handleClick} type="button" className="button">
-        Select Day and Route
+        Select Route
       </button>
       {show ? (
         <div className="dropdown" style={dropdown}>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {children}
+            <li
+              onClick={() => viewSetter("Route 1")}
+              style={{ padding: "8px 12px", cursor: "pointer" }}
+            >
+              Route 1
+            </li>
+            <li
+              onClick={() => viewSetter("Route 2")}
+              style={{ padding: "8px 12px", cursor: "pointer" }}
+            >
+              Route 2
+            </li>
           </ul>
         </div>
       ) : null}

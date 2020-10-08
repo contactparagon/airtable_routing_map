@@ -7,7 +7,6 @@ import Dropdown from "./Dropdown/Dropdown";
 function RoutedMap() {
   const base = useBase();
   const deliveries = base.getTableByName("Deliveries");
-  const views = deliveries.views;
   const [map, setMap] = useState();
   const [maps, setMaps] = useState();
   const [service, setService] = useState();
@@ -18,30 +17,40 @@ function RoutedMap() {
     deliveries.getViewByName("Route Sorting - Today")
   );
   let records = useRecords(view.selectRecords());
-  console.log(view);
   const [show, setShow] = useState(false);
 
   const handleClick = () => {
     setShow(!show);
   };
 
-  const pointsSetter = () => {
-    console.log("PS View,", view.name);
-    let data = records.map((record) => {
-      return record.getCellValue("Address");
-    });
+  const pointsSetter = (sentColumn) => {
+    if (!sentColumn) {
+      sentColumn = "Route 1";
+    }
+    let data = records
+      .filter((record) => {
+        return (
+          record.getCellValue("fldsAptihO9BqOPNU") &&
+          record.getCellValue("fldsAptihO9BqOPNU").name == sentColumn
+        );
+      })
+      .map((record) => {
+        return record.getCellValue("fld5UqQOh4DQvUou7");
+      });
     console.log("pointSetter,", data);
     setPoints(data);
-  };
-
-  const viewSetter = (sentView) => {
-    setView(deliveries.getViewByName(sentView.name));
-    setMaps(defaultMaps);
-    console.log("vs, name", view.name);
-    pointsSetter();
-    dataIsLoaded();
     setShow(false);
   };
+
+  // const viewSetter = (sentColumn) => {
+  //   console.log("Setting view,", sentView);
+  //   setView(deliveries.getViewByName(sentView.name));
+  //   setMaps(defaultMaps);
+  //   console.log("vs, name", view.name);
+  //   pointsSetter();
+  //   dataIsLoaded();
+  //   setShow(false);
+  // };
 
   const apiIsLoaded = (map, maps) => {
     setMap(map);
@@ -85,19 +94,12 @@ function RoutedMap() {
 
   return (
     <div className="googlemap" style={googlemap}>
-      <Dropdown handleClick={handleClick} show={show}>
-        {views.map((view) => {
-          return (
-            <li
-              onClick={() => viewSetter(view)}
-              style={{ padding: "8px 12px", cursor: "pointer" }}
-              key={view.name}
-            >
-              {view.name}
-            </li>
-          );
-        })}
-      </Dropdown>
+      <Dropdown
+        handleClick={handleClick}
+        viewSetter={pointsSetter}
+        show={show}
+      />
+
       <GoogleMapReact
         bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
         defaultCenter={{ lat: 38, lng: 267 }}
