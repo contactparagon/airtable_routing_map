@@ -16,8 +16,15 @@ const dropdown = {
   boxShadow: "0 16px 24px 2px rgba(0,0,0,0.14)",
 };
 
+const mailToContainer = {
+  zIndex: 2,
+  position: "fixed",
+  top: "2%",
+  right: "2%",
+};
+
 const googlemap = {
   height: "100vh",
 };
 
-export { googlemap, dropDownContainer, dropdown };
+export { googlemap, dropDownContainer, dropdown, mailToContainer };

@@ -3,6 +3,7 @@ import GoogleMapReact from "google-map-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { googlemap } from "./Styles/Styles";
 import Dropdown from "./Dropdown/Dropdown";
+import MailTo from "./MailTo/MailTo";
 
 function RoutedMap() {
   const base = useBase();
@@ -11,7 +12,6 @@ function RoutedMap() {
   const [maps, setMaps] = useState();
   const [service, setService] = useState();
   const [renderer, setRenderer] = useState();
-  const [defaultMaps, setDefaultMaps] = useState();
   const [points, setPoints] = useState([]);
   const [view, setView] = useState(
     deliveries.getViewByName("Route Sorting - Today")
@@ -37,27 +37,16 @@ function RoutedMap() {
       .map((record) => {
         return record.getCellValue("fld5UqQOh4DQvUou7");
       });
-    console.log("pointSetter,", data);
     setPoints(data);
     setShow(false);
   };
 
-  // const viewSetter = (sentColumn) => {
-  //   console.log("Setting view,", sentView);
-  //   setView(deliveries.getViewByName(sentView.name));
-  //   setMaps(defaultMaps);
-  //   console.log("vs, name", view.name);
-  //   pointsSetter();
-  //   dataIsLoaded();
-  //   setShow(false);
-  // };
 
   const apiIsLoaded = (map, maps) => {
     setMap(map);
     setMaps(maps);
     setRenderer(new maps.DirectionsRenderer());
     setService(new maps.DirectionsService());
-    setDefaultMaps(maps);
     pointsSetter();
   };
 
@@ -82,6 +71,7 @@ function RoutedMap() {
           if (status === "OK") {
             renderer.setDirections(response);
             renderer.setMap(map);
+            console.log(response)
           } else {
             console.log("Status:", status);
           }
@@ -94,12 +84,12 @@ function RoutedMap() {
 
   return (
     <div className="googlemap" style={googlemap}>
-      <Dropdown
+      <Dropdown records={records}
         handleClick={handleClick}
         viewSetter={pointsSetter}
         show={show}
       />
-
+      <MailTo />
       <GoogleMapReact
         bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
         defaultCenter={{ lat: 38, lng: 267 }}
