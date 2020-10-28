@@ -1,16 +1,17 @@
 
 import React from "react"
 import {mailToContainer} from "../Styles/Styles"
-const MailTo = () => {
+const MailTo = ({subject, body}) => {
     
-
+    
     return (
         <div>
-            <div style={mailToContainer}>
-            <button>
-                Email Link
-            </button>
-        </div>
+            <form style={mailToContainer}>
+                <input type="email" />
+                <a href={`mailto:${emailAddress}?subject=${encodeURIComponent(subject) || ''}&body=${encodeURIComponent(body) || ''}`}><button>
+                    Email Link
+                </button></a>
+            </form>
             
         </div>
         

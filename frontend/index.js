@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { googlemap } from "./Styles/Styles";
 import Dropdown from "./Dropdown/Dropdown";
 import MailTo from "./MailTo/MailTo";
+import CopyLink from "./MailTo/CopyLink";
 
 function RoutedMap() {
   const base = useBase();
@@ -13,6 +14,7 @@ function RoutedMap() {
   const [service, setService] = useState();
   const [renderer, setRenderer] = useState();
   const [points, setPoints] = useState([]);
+  const [wayPointOrder, setWayPointOrder] = useState([])
   const [view, setView] = useState(
     deliveries.getViewByName("Route Sorting - Today")
   );
@@ -71,7 +73,7 @@ function RoutedMap() {
           if (status === "OK") {
             renderer.setDirections(response);
             renderer.setMap(map);
-            console.log(response)
+            setWayPointOrder(response.routes[0].waypoint_order)
           } else {
             console.log("Status:", status);
           }
@@ -89,13 +91,14 @@ function RoutedMap() {
         viewSetter={pointsSetter}
         show={show}
       />
-      <MailTo />
+      {points && wayPointOrder ? <CopyLink points={points} wayPointOrder={wayPointOrder}/> : null}
       <GoogleMapReact
         bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
         defaultCenter={{ lat: 38, lng: 267 }}
         defaultZoom={5}
         yesIWantToUseGoogleMapApiInternals
         onGoogleApiLoaded={({ map, maps }) => apiIsLoaded(map, maps)}
+        options={{fullscreenControl: false}}
       ></GoogleMapReact>
     </div>
   );
