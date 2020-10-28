@@ -14,6 +14,7 @@ function RoutedMap() {
   const [service, setService] = useState();
   const [renderer, setRenderer] = useState();
   const [points, setPoints] = useState([]);
+  const [wayPointOrder, setWayPointOrder] = useState([])
   const [view, setView] = useState(
     deliveries.getViewByName("Route Sorting - Today")
   );
@@ -72,7 +73,7 @@ function RoutedMap() {
           if (status === "OK") {
             renderer.setDirections(response);
             renderer.setMap(map);
-            console.log(response)
+            setWayPointOrder(response.routes[0].waypoint_order)
           } else {
             console.log("Status:", status);
           }
@@ -90,7 +91,7 @@ function RoutedMap() {
         viewSetter={pointsSetter}
         show={show}
       />
-      <CopyLink />
+      {points && wayPointOrder ? <CopyLink points={points} wayPointOrder={wayPointOrder}/> : null}
       <GoogleMapReact
         bootstrapURLKeys={{ key: "AIzaSyDZ3e4pVqA6LJHHN17btdMlQtMUN0Rs_2c" }}
         defaultCenter={{ lat: 38, lng: 267 }}
