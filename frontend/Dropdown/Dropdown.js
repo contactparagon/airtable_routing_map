@@ -23,7 +23,7 @@ const Dropdown = ({ viewSetter, handleClick, show, records }) => {
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {routeList.map(route =>{
               return(<li
-                onClick={() => viewSetter("Route 1")}
+                onClick={() => viewSetter(route)}
                 style={{ padding: "8px 12px", cursor: "pointer" }}
                 key={route}
               >
