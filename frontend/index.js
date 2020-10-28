@@ -40,6 +40,7 @@ function RoutedMap() {
         return record.getCellValue("fld5UqQOh4DQvUou7");
       });
     setPoints(data);
+    console.log("Points,",sentColumn,points)
     setShow(false);
   };
 

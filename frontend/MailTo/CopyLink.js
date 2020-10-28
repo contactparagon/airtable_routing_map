@@ -6,7 +6,6 @@ const CopyLink = ({points,wayPointOrder}) => {
     const [routeLink,setRouteLink] = useState("")
     const inputRef = useRef(null)
     
-    console.log("Copylink",points,wayPointOrder)
     useEffect(()=>{
         if(points && wayPointOrder){
             link()
@@ -23,14 +22,12 @@ const CopyLink = ({points,wayPointOrder}) => {
         let fullRoute = [route.origin,...sortedWaypoints,route.destination]
         let urlString = ""
         fullRoute.map(location => {
-            console.log(typeof location)
             urlString = urlString.concat(location, "/")
         })
         setRouteLink("https://www.google.com/maps/dir/"+encodeURI(urlString))
     }
 
     function copyLink(e){
-        link()
         e.preventDefault();
         inputRef.current.select();
         document.execCommand('copy');
